@@ -2,7 +2,7 @@
 
 namespace Barryvdh\LaravelIdeHelper;
 
-use Exception;
+use Composer\Autoload\ClassMapGenerator;
 use Illuminate\Database\Eloquent\Factory;
 use ReflectionClass;
 
@@ -10,27 +10,45 @@ class Factories
 {
     public static function all()
     {
+        $directories = config('ide-helper.factory_locations');
         $factories = [];
+        foreach ($directories as $dir) {
+            if (is_dir(base_path($dir))) {
+                $dir = base_path($dir);
+            }
 
-        if (static::isLaravelSevenOrLower()) {
-            $factory = app(Factory::class);
+            $dirs = glob($dir, GLOB_ONLYDIR);
+            foreach ($dirs as $dir) {
 
-            $definitions = (new ReflectionClass(Factory::class))->getProperty('definitions');
-            $definitions->setAccessible(true);
+                if (!is_dir($dir)) {
+                    continue;
+                }
 
-            foreach ($definitions->getValue($factory) as $factory_target => $config) {
-                try {
-                    $factories[] = new ReflectionClass($factory_target);
-                } catch (Exception $exception) {
+                if (file_exists($dir)) {
+                    $classMap = ClassMapGenerator::createMap($dir);
+
+                    // Sort list so it's stable across different environments
+                    ksort($classMap);
+
+                    foreach ($classMap as $factory => $path) {
+                        $factories[] = $factory;
+                    }
                 }
             }
         }
 
-        return $factories;
-    }
+        $result = [];
 
-    protected static function isLaravelSevenOrLower()
-    {
-        return class_exists('Illuminate\Database\Eloquent\Factory');
+        foreach ($factories as $factory) {
+            $class = new ReflectionClass($factory);
+
+            if ($parent = $class->getParentClass()) {
+                if ($parent->getName() == 'Illuminate\Database\Eloquent\Factories\Factory') {
+                    $result[] = new ReflectionClass($factory);
+                }
+            }
+        }
+
+        return $result;
     }
 }

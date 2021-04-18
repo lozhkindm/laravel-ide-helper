@@ -24,12 +24,12 @@
     <?php if ($namespace == '\Illuminate\Database\Eloquent') :
         continue;
     endif; ?>
-namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> { 
+namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> {
     <?php foreach ($aliases as $alias) : ?>
-        <?= trim($alias->getDocComment('    ')) ?> 
+        <?= trim($alias->getDocComment('    ')) ?>
         <?= $alias->getClassType() ?> <?= $alias->getExtendsClass() ?> {
         <?php foreach ($alias->getMethods() as $method) : ?>
-            <?= trim($method->getDocComment('        ')) ?> 
+            <?= trim($method->getDocComment('        ')) ?>
         public static function <?= $method->getName() ?>(<?= $method->getParamsWithDefault() ?>)
         {<?php if ($method->getDeclaringClass() !== $method->getRoot()) : ?>
             //Method inherited from <?= $method->getDeclaringClass() ?>
@@ -40,19 +40,19 @@ namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> {
             <?php endif?>
             <?= $method->shouldReturn() ? 'return ' : '' ?><?= $method->getRootMethodCall() ?>;
         }
-        <?php endforeach; ?> 
+        <?php endforeach; ?>
     }
-    <?php endforeach; ?> 
+    <?php endforeach; ?>
 }
 
 <?php endforeach; ?>
 
 <?php foreach ($namespaces_by_alias_ns as $namespace => $aliases) : ?>
-namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> { 
+namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> {
     <?php foreach ($aliases as $alias) : ?>
         <?= $alias->getClassType() ?> <?= $alias->getShortName() ?> extends <?= $alias->getExtends() ?> {<?php if ($alias->getExtendsNamespace() == '\Illuminate\Database\Eloquent') : ?>
-            <?php foreach ($alias->getMethods() as $method) : ?> 
-                <?= trim($method->getDocComment('            ')) ?> 
+            <?php foreach ($alias->getMethods() as $method) : ?>
+                <?= trim($method->getDocComment('            ')) ?>
             public static function <?= $method->getName() ?>(<?= $method->getParamsWithDefault() ?>)
             {<?php if ($method->getDeclaringClass() !== $method->getRoot()) : ?>
                 //Method inherited from <?= $method->getDeclaringClass() ?>
@@ -65,14 +65,14 @@ namespace <?= $namespace == '__root' ? '' : trim($namespace, '\\') ?> {
             }
             <?php endforeach; ?>
         <?php endif; ?>}
-    <?php endforeach; ?> 
+    <?php endforeach; ?>
 }
 
 <?php endforeach; ?>
 
 <?php if ($helpers) : ?>
 namespace {
-    <?= $helpers ?> 
+    <?= $helpers ?>
 }
 <?php endif; ?>
 
@@ -106,9 +106,12 @@ namespace Illuminate\Support {
 <?php foreach ($factories as $factory) : ?>
 namespace <?=$factory->getNamespaceName()?> {
     /**
-    * @method \Illuminate\Database\Eloquent\Collection|<?=$factory->getShortName()?>[]|<?=$factory->getShortName()?> create($attributes = [])
-    * @method \Illuminate\Database\Eloquent\Collection|<?=$factory->getShortName()?>[]|<?=$factory->getShortName()?> make($attributes = [])
+    * @method \Illuminate\Database\Eloquent\Collection|\<?=$factory->getDefaultProperties()['model']?>[]|\<?=$factory->getDefaultProperties()['model']?> create($attributes = [], ?\Illuminate\Database\Eloquent\Model $parent = null)
+    * @method \Illuminate\Database\Eloquent\Collection|\<?=$factory->getDefaultProperties()['model']?>[]|\<?=$factory->getDefaultProperties()['model']?> make($attributes = [], ?\Illuminate\Database\Eloquent\Model $parent = null)
+    * @method \<?=$factory->getDefaultProperties()['model']?> createOne($attributes = [])
+    * @method \<?=$factory->getDefaultProperties()['model']?> makeOne($attributes = [])
+    * @method \Illuminate\Database\Eloquent\Collection|\<?=$factory->getDefaultProperties()['model']?>[] createMany(iterable $records)
     */
-    class <?=$factory->getShortName()?>FactoryBuilder extends \Illuminate\Database\Eloquent\FactoryBuilder {}
+    class <?=$factory->getShortName()?> {}
 }
 <?php endforeach; ?>
